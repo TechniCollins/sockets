@@ -8,9 +8,9 @@ SERVER_IP = socket.gethostbyname(socket.gethostname())
 # Second argument is transmission mode? In this case streaming? Do more research on this.
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-# Bind the socket to our server IP address on port 6007
+# Bind the socket to our server IP address on port 6009
 # the bind method takes a tuple in this format (ADDRESS, PORT)
-server_socket.bind((SERVER_IP, 6007))
+server_socket.bind((SERVER_IP, 6009))
 
 
 # The function below will run in a new thread
@@ -19,20 +19,24 @@ def client_handler(client_socket, client_address):
     print(f"New connection: {client_address}")
     
     while True:
-        message = client_socket.recv(128).decode("utf-8")
-        # message_length = int(message_length)
-        # message = client_socket.recv(message_length).decode("utf-8")
+        message_length = client_socket.recv(128).decode("utf-8")
+        message_length = int(message_length)
+        message = client_socket.recv(message_length).decode("utf-8")
         # The block above waits to receive a 128 byte message from the client
         # The message is then decoded from bytes to utf8 format
 
-        print(f"{client_address} : {message}") # Print the message sent by the client
+        if message: # Check that the client is not sending an empty message
+            print(f"{client_address} : {message}") # Print the message sent by the client
 
-        # Cleanly disconnect the client if the message is #?DisconnectSignal?#
-        if message == "#?DisconnectSignal?#":
-            break # Stop the loop
+            # Cleanly disconnect the client if the message is #?DisconnectSignal?#
+            if message == "#?DisconnectSignal?#":
+                client_socket.send("Server received disconnection command".encode("utf-8"))
+                break # Stop the loop
+
+            # Send a utf8-encoded acknowledgment message back to the client
+            client_socket.send("Server received message".encode("utf-8"))
 
     client_socket.close()
-    print(f"{client_address} disconnected")
 
 
 server_socket.listen()
@@ -50,5 +54,5 @@ while True:
     t.start() # Start the thread
 
     # Output the total number of connections
-    print(f"The server is handling {threading.activeCount() - 1} connections")
+    print(f"The server is handling {threading.active_count() - 1} connections")
 
