@@ -4,7 +4,7 @@ SERVER_IP = socket.gethostbyname(socket.gethostname())
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-client_socket.connect((SERVER_IP, 6009)) # Connect to the address defined in the server script
+client_socket.connect((SERVER_IP, 6007)) # Connect to the address defined in the server script
 
 # We first send the message length, then the actual message -> Why?
 # I'm not sure, but if I don't do this, the server concatnates different messages -> Do some research 
@@ -23,6 +23,8 @@ def send(message):
 
 	# Print the response from the server
 	print(client_socket.recv(128))
+	print("Press any button to continue")
+	input() # Just to pause the client for testing purposes
 
 send("Sockets are awesome... I think :)")
 send("Roses are black, violets are green")
